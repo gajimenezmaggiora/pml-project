@@ -1,0 +1,144 @@
+---
+title: "Practical Machine Learning Course Project"
+author: "Gustavo Jimenez-Maggiora"
+date: "April 26, 2015"
+output: html_document
+---
+
+```{r, cache=TRUE}
+require(caret)
+require(mlbench)
+# require(party)
+require(randomForest)
+
+set.seed(7)
+```
+
+## Data
+We are using the training and testing sets provided.
+
+```{r, cache=TRUE}
+training <- read.csv('./pml-training.csv')
+testing <- read.csv('./pml-testing.csv')
+
+```
+
+Upon review of the data set, several columns were removed.
+
+First, we removed any columns that had zero or close to zero variance in the training set.
+
+```{r, cache=TRUE}
+remove <- nearZeroVar(training)
+training <- training[,-remove]
+testing <- testing[,-remove]
+
+```
+
+Secondly, we removed any columns that have NA values (**NOTE**: we assume that the same columns
+have NA's in the testing set).
+
+```{r, cache=TRUE}
+ok <- apply(training, 2, function(x) !any(is.na(x)))
+training <- training[,ok]
+testing <- testing[,ok]
+
+```
+
+Finally, we remove any variables that are summary statistics calculated by
+the authors of the data set (eg. skewness, kurtosis, etc.)
+
+```{r, cache=TRUE}
+not_ok <- grepl('^(X|cvtd_timestamp|kurtosis|skewness|max_|min_|amplitude)',colnames(training));
+
+training<-training[,!not_ok]
+testing<-testing[,!not_ok]
+
+```
+
+The final training data set is the following (**NOTE**: the testing set has the same structure):
+
+```{r, cache=TRUE}
+# Dimensions
+dim(training)
+dim(testing)
+
+# Summary - training data
+summary(training)
+```
+
+## Feature Selection
+
+We use Recursive Feature Elimination (RFE) for automated feature selection:
+
+```{r, cache=TRUE}
+
+# Run RFE
+control <- rfeControl(functions=rfFuncs, method="cv", number=10)
+fitRFE <- rfe(training[,-57], training[,57], rfeControl = control)
+
+```
+
+Results of RFE feature selection:
+
+```{r, cache=TRUE}
+fitRFE
+```
+
+Plot of top 4 features identified by the RFE model:
+
+```{r, cache=TRUE}
+
+trellis.par.set(caretTheme())
+plot(fitRFE, type = c("g", "o"))
+```
+
+## Methods
+
+We fit three models using various methods and subsequently compare them.
+
+**Recursive Partitioning**
+
+```{r, cache=TRUE}
+# RPART
+fitRP<-train(classe ~ raw_timestamp_part_1 + num_window + roll_belt + yaw_belt, data=training, method='rpart')
+
+```
+
+**Random Forest**
+
+```{r, cache=TRUE}
+# Random Forest
+fitRF<-train(classe ~ raw_timestamp_part_1 + num_window + roll_belt + yaw_belt, data=training, method='rf')
+
+```
+
+To find the best performing method, we compare estimated accuracy and ooe results for various models:
+
+```{r, cache=TRUE}
+# Compare models using mlbench
+results <- resamples(list(RP=fitRP, RF=fitRF))
+summary(results)
+
+```
+
+Based on this comparison, we select the **Random Forest** model.
+
+## Predictive Model
+
+We perform prediction on the testing set using the model we have selected.
+
+```{r, cache=TRUE}
+pRF <- predict(fitRF, testing)
+pRF
+
+```
+
+**Predicted Outcomes**
+
+```{r, cache=TRUE}
+final_results <- data.frame(pred = pRF)
+final_results
+```
+
+## Conclusion
+In conclusion, we found optimal subset of predictors using RFE consisting of four predictors: raw_timestamp_part_1, num_window, roll_belt, and yaw_belt. A RF model was developed using this subset.
