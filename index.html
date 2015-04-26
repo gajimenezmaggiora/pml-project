@@ -288,6 +288,14 @@ pRF</code></pre>
 <pre><code>##  [1] B A B A A E D B A A B C B A E E A B B B
 ## Levels: A B C D E</code></pre>
 <p><strong>Predicted Outcomes</strong></p>
+<pre class="r"><code># Function to write predicted results
+pml_write_files = function(x){
+  n = length(x)
+  for(i in 1:n){
+    filename = paste0(&quot;problem_id_&quot;,i,&quot;.txt&quot;)
+    write.table(x[i],file=filename,quote=FALSE,row.names=FALSE,col.names=FALSE)
+  }
+}</code></pre>
 <pre class="r"><code>final_results &lt;- data.frame(pred = pRF)
 final_results</code></pre>
 <pre><code>##    pred
@@ -311,6 +319,7 @@ final_results</code></pre>
 ## 18    B
 ## 19    B
 ## 20    B</code></pre>
+<pre class="r"><code>pml_write_files(pRF)</code></pre>
 </div>
 <div id="conclusion" class="section level2">
 <h2>Conclusion</h2>
