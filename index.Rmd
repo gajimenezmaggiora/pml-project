@@ -68,7 +68,8 @@ summary(training)
 
 ## Feature Selection
 
-We use Recursive Feature Elimination (RFE) for automated feature selection:
+We use Recursive Feature Elimination (RFE) for automated feature selection with 10-fold cross validation:
+
 
 ```{r, cache=TRUE}
 
@@ -121,7 +122,16 @@ summary(results)
 
 ```
 
-Based on this comparison, we select the **Random Forest** model.
+Based on this comparison, we select the **Random Forest** model:
+
+```{r, cache=TRUE}
+fitRF
+```
+
+```{r, cache=TRUE}
+fitRF$finalModel
+```
+
 
 ## Predictive Model
 
@@ -156,4 +166,4 @@ pml_write_files(pRF)
 ```
 
 ## Conclusion
-In conclusion, we found optimal subset of predictors using RFE consisting of four predictors: raw_timestamp_part_1, num_window, roll_belt, and yaw_belt. A RF model was developed using this subset.
+In conclusion, we found optimal subset of predictors using RFE consisting of four predictors: raw_timestamp_part_1, num_window, roll_belt, and yaw_belt. A RF model was developed using this subset with an OOB error rate of **0.01%**.

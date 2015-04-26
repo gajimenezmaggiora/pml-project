@@ -216,7 +216,7 @@ summary(training)</code></pre>
 </div>
 <div id="feature-selection" class="section level2">
 <h2>Feature Selection</h2>
-<p>We use Recursive Feature Elimination (RFE) for automated feature selection:</p>
+<p>We use Recursive Feature Elimination (RFE) for automated feature selection with 10-fold cross validation:</p>
 <pre class="r"><code># Run RFE
 control &lt;- rfeControl(functions=rfFuncs, method=&quot;cv&quot;, number=10)
 fitRFE &lt;- rfe(training[,-57], training[,57], rfeControl = control)</code></pre>
@@ -278,7 +278,44 @@ summary(results)</code></pre>
 ##      Min. 1st Qu. Median   Mean 3rd Qu.   Max. NA's
 ## RP 0.1194  0.2656 0.3485 0.3040  0.3836 0.4389    0
 ## RF 0.9988  0.9996 0.9997 0.9997  0.9998 1.0000    0</code></pre>
-<p>Based on this comparison, we select the <strong>Random Forest</strong> model.</p>
+<p>Based on this comparison, we select the <strong>Random Forest</strong> model:</p>
+<pre class="r"><code>fitRF</code></pre>
+<pre><code>## Random Forest 
+## 
+## 19622 samples
+##    56 predictor
+##     5 classes: 'A', 'B', 'C', 'D', 'E' 
+## 
+## No pre-processing
+## Resampling: Bootstrapped (25 reps) 
+## 
+## Summary of sample sizes: 19622, 19622, 19622, 19622, 19622, 19622, ... 
+## 
+## Resampling results across tuning parameters:
+## 
+##   mtry  Accuracy   Kappa      Accuracy SD   Kappa SD    
+##   2     0.9997339  0.9996634  0.0002292142  0.0002900365
+##   3     0.9997284  0.9996565  0.0002136440  0.0002701756
+##   4     0.9996786  0.9995935  0.0002872884  0.0003635136
+## 
+## Accuracy was used to select the optimal model using  the largest value.
+## The final value used for the model was mtry = 2.</code></pre>
+<pre class="r"><code>fitRF$finalModel</code></pre>
+<pre><code>## 
+## Call:
+##  randomForest(x = x, y = y, mtry = param$mtry) 
+##                Type of random forest: classification
+##                      Number of trees: 500
+## No. of variables tried at each split: 2
+## 
+##         OOB estimate of  error rate: 0.01%
+## Confusion matrix:
+##      A    B    C    D    E  class.error
+## A 5580    0    0    0    0 0.0000000000
+## B    1 3796    0    0    0 0.0002633658
+## C    0    0 3422    0    0 0.0000000000
+## D    0    0    0 3216    0 0.0000000000
+## E    0    0    0    1 3606 0.0002772387</code></pre>
 </div>
 <div id="predictive-model" class="section level2">
 <h2>Predictive Model</h2>
@@ -323,7 +360,7 @@ final_results</code></pre>
 </div>
 <div id="conclusion" class="section level2">
 <h2>Conclusion</h2>
-<p>In conclusion, we found optimal subset of predictors using RFE consisting of four predictors: raw_timestamp_part_1, num_window, roll_belt, and yaw_belt. A RF model was developed using this subset.</p>
+<p>In conclusion, we found optimal subset of predictors using RFE consisting of four predictors: raw_timestamp_part_1, num_window, roll_belt, and yaw_belt. A RF model was developed using this subset with an OOB error rate of <strong>0.01%</strong>.</p>
 </div>
 
 
